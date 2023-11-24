@@ -3,10 +3,14 @@ grant {
   // TODO: get these fixed in oci sdk
   // Required by Jersey
   permission java.lang.RuntimePermission "getClassLoader";
+  
   permission java.lang.reflect.ReflectPermission "suppressAccessChecks";
   permission java.lang.RuntimePermission "accessDeclaredMembers";
   permission java.util.PropertyPermission "*", "read,write";
   permission java.lang.RuntimePermission "setFactory";
+  permission java.lang.RuntimePermission "createSecurityManager";
+  permission java.lang.RuntimePermission "setSecurityManager";
+  
 
   // Required by the SDK to overwrite reserved headers
   permission java.util.PropertyPermission "sun.net.http.allowRestrictedHeaders", "write";

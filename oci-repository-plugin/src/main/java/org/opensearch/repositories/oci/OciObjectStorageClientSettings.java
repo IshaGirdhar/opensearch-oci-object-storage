@@ -17,7 +17,9 @@ import static org.opensearch.common.settings.Setting.simpleString;
 import com.oracle.bmc.Region;
 import com.oracle.bmc.auth.BasicAuthenticationDetailsProvider;
 import com.oracle.bmc.auth.InstancePrincipalsAuthenticationDetailsProvider;
+import com.oracle.bmc.auth.SuppliedServiceAccountTokenProvider;
 import com.oracle.bmc.auth.SimpleAuthenticationDetailsProvider;
+import com.oracle.bmc.auth.okeworkloadidentity.OkeWorkloadIdentityAuthenticationDetailsProvider;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.function.Supplier;
@@ -58,6 +60,13 @@ public class OciObjectStorageClientSettings {
                     false,
                     Setting.Property.NodeScope,
                     Setting.Property.Dynamic);
+  
+    public static final Setting<Boolean> WORKLOAD_IDENTITY =
+                boolSetting(
+                        "useWorkloadIdentity",
+                        false,
+                        Setting.Property.NodeScope,
+                        Setting.Property.Dynamic);
 
     /** The credentials used by the client to connect to the Storage endpoint. */
     private final BasicAuthenticationDetailsProvider authenticationDetailsProvider;
@@ -69,10 +78,17 @@ public class OciObjectStorageClientSettings {
         this.endpoint = OciObjectStorageRepository.getSetting(ENDPOINT_SETTING, metadata);
         final boolean isInstancePrincipal =
                 OciObjectStorageRepository.getSetting(INSTANCE_PRINCIPAL, metadata);
+        final boolean isWorkloadIdentity =
+                        OciObjectStorageRepository.getSetting(WORKLOAD_IDENTITY, metadata);
 
         // If we are not using instance principal we are going to have to provide user principal
         // info
-        if (!isInstancePrincipal) {
+        final String regionStr =
+                OciObjectStorageRepository.getSetting(REGION_SETTING, metadata);
+        final Region region = Region.fromRegionCodeOrId(regionStr);
+
+
+        if (!isInstancePrincipal && !isWorkloadIdentity) {
             final String userId = OciObjectStorageRepository.getSetting(USER_ID_SETTING, metadata);
             final String tenantId =
                     OciObjectStorageRepository.getSetting(TENANT_ID_SETTING, metadata);
@@ -80,10 +96,6 @@ public class OciObjectStorageClientSettings {
                     OciObjectStorageRepository.getSetting(FINGERPRINT_SETTING, metadata);
             final String credentialsFilePath =
                     OciObjectStorageRepository.getSetting(CREDENTIALS_FILE_SETTING, metadata);
-            final String regionStr =
-                    OciObjectStorageRepository.getSetting(REGION_SETTING, metadata);
-
-            final Region region = Region.fromRegionCodeOrId(regionStr);
 
             log.info(
                     "Initializing client settings with:\n"
@@ -110,11 +122,14 @@ public class OciObjectStorageClientSettings {
                             userId,
                             tenantId,
                             fingerprint);
-        } else {
+        } else if (!isWorkloadIdentity){
+
             // We are using instance principal and therefore we are going to use instance principal
             // provider
             log.info("Initializing client using instance principals");
             this.authenticationDetailsProvider = toAuthDetailsProvider();
+        } else {
+            this.authenticationDetailsProvider = toAuthDetailsProvider(region);
         }
     }
 
@@ -146,8 +161,16 @@ public class OciObjectStorageClientSettings {
     }
 
     private static BasicAuthenticationDetailsProvider toAuthDetailsProvider() {
-        try {
+        try { 
             return InstancePrincipalsAuthenticationDetailsProvider.builder().build();
+        } catch (Exception ex) {
+            log.error("Failure calling toAuthDetailsProvider", ex);
+            throw ex;
+        }
+    }
+    private static BasicAuthenticationDetailsProvider toAuthDetailsProvider(Region region) {
+        try { 
+            return OkeWorkloadIdentityAuthenticationDetailsProvider.builder().build();
         } catch (Exception ex) {
             log.error("Failure calling toAuthDetailsProvider", ex);
             throw ex;

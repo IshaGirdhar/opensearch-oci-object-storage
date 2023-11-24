@@ -86,6 +86,12 @@ subprojects {
         testCompileClasspath("com.oracle.oci.sdk:oci-java-sdk-objectstorage:${sdk_version}")
         runtimeClasspath("com.oracle.oci.sdk:oci-java-sdk-objectstorage:${sdk_version}")
         testRuntimeClasspath("com.oracle.oci.sdk:oci-java-sdk-objectstorage:${sdk_version}")
+        
+        implementation("com.oracle.oci.sdk:oci-java-sdk-addons-oke-workload-identity:${sdk_version}")
+        compileClasspath("com.oracle.oci.sdk:oci-java-sdk-addons-oke-workload-identity:${sdk_version}")
+        testCompileClasspath("com.oracle.oci.sdk:oci-java-sdk-addons-oke-workload-identity:${sdk_version}")
+        runtimeClasspath("com.oracle.oci.sdk:oci-java-sdk-addons-oke-workload-identity:${sdk_version}")
+        testRuntimeClasspath("com.oracle.oci.sdk:oci-java-sdk-addons-oke-workload-identity:${sdk_version}")
 
         runtimeClasspath("org.slf4j:slf4j-api") {
             version {

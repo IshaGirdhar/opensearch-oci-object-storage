@@ -46,21 +46,21 @@ public class OciObjectStoragePlugin extends Plugin implements RepositoryPlugin {
          * where adding the required java.net.SocketPermission to oci-repository-plugin/src/main/resources/plugin-security.policy
          * doesn't fix the issue. See https://github.com/opensearch-project/opensearch-oci-object-storage/issues/13
          */
-        AccessController.doPrivileged(
-                (PrivilegedAction<Object>)
-                        () -> {
-                            System.setSecurityManager(
-                                    new SecurityManager() {
-
-                                        @Override
-                                        public void checkPermission(Permission perm) {
-                                            if (perm instanceof AllPermission) {
-                                                throw new SecurityException();
-                                            }
-                                        }
-                                    });
-                            return null;
-                        });
+//        AccessController.doPrivileged(
+//                (PrivilegedAction<Object>)
+//                        () -> {
+//                            System.setSecurityManager(
+//                                    new SecurityManager() {
+//
+//                                        @Override
+//                                        public void checkPermission(Permission perm) {
+//                                            if (perm instanceof AllPermission) {
+//                                                throw new SecurityException();
+//                                            }
+//                                        }
+//                                    });
+//                            return null;
+//                        });
 
         // Hack to force Jersey to load first as a default provider
         HttpProvider.getDefault();
@@ -96,6 +96,7 @@ public class OciObjectStoragePlugin extends Plugin implements RepositoryPlugin {
                 OciObjectStorageClientSettings.REGION_SETTING,
                 OciObjectStorageClientSettings.FINGERPRINT_SETTING,
                 OciObjectStorageClientSettings.INSTANCE_PRINCIPAL,
+                OciObjectStorageClientSettings.WORKLOAD_IDENTITY,
                 OciObjectStorageClientSettings.TENANT_ID_SETTING,
                 OciObjectStorageClientSettings.USER_ID_SETTING,
                 OciObjectStorageRepository.BASE_PATH_SETTING,

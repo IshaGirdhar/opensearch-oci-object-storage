@@ -35,6 +35,7 @@ public class TestConstants {
                 .put(OciObjectStorageClientSettings.REGION_SETTING.getKey(), DEV_REGION)
                 .put(OciObjectStorageClientSettings.CREDENTIALS_FILE_SETTING.getKey(), keyFile)
                 .put(OciObjectStorageClientSettings.INSTANCE_PRINCIPAL.getKey(), false)
+                .put(OciObjectStorageClientSettings.WORKLOAD_IDENTITY.getKey(), false)
                 .put(OciObjectStorageClientSettings.FINGERPRINT_SETTING.getKey(), "fingerprint")
                 .put(OciObjectStorageClientSettings.TENANT_ID_SETTING.getKey(), "tenantId")
                 .put(OciObjectStorageClientSettings.USER_ID_SETTING.getKey(), "userId")
